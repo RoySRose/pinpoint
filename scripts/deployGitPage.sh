@@ -26,7 +26,7 @@ echo "[View live](https://${GH_USER}.github.io/${GH_REPO}/)" > README.md
 
 #add, commit and push files
 git add -f .
-git commit -m "Auto build $TRAVIS_BUILD_NUMBER"
+git commit -m "Auto build with Travis $TRAVIS_BUILD_NUMBER"
 git push -fq origin gh-pages > /dev/null
 
 echo "Done updating gh-pages\n"
