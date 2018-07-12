@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.navercorp.pinpoint.plugin.resin;
+package com.navercorp.pinpoint.plugin.weblogic;
 
-import com.caucho.server.http.HttpServletRequestImpl;
 import com.navercorp.pinpoint.bootstrap.context.TraceContext;
 import com.navercorp.pinpoint.bootstrap.logging.PLogger;
 import com.navercorp.pinpoint.bootstrap.logging.PLoggerFactory;
@@ -26,6 +25,8 @@ import com.navercorp.pinpoint.bootstrap.plugin.request.RemoteAddressResolverFact
 import com.navercorp.pinpoint.bootstrap.plugin.request.ServletRequestListenerInterceptorHelper;
 import com.navercorp.pinpoint.bootstrap.plugin.request.ServletServerRequestWrapper;
 import com.navercorp.pinpoint.bootstrap.plugin.request.ServletServerRequestWrapperFactory;
+import com.navercorp.pinpoint.common.util.Assert;
+import weblogic.servlet.internal.ServletRequestImpl;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletRequest;
@@ -36,18 +37,19 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * @author jaehong.kim
  */
-public class ResinServletRequestListener implements ServletRequestListener {
-    private PLogger logger = PLoggerFactory.getLogger(this.getClass());
-    private boolean isDebug = logger.isDebugEnabled();
+public class WeblogicServletRequestListener implements ServletRequestListener {
+    private final PLogger logger = PLoggerFactory.getLogger(this.getClass());
+    private final boolean isDebug = logger.isDebugEnabled();
     private final boolean isInfo = logger.isInfoEnabled();
 
     private ServletRequestListenerInterceptorHelper servletRequestListenerInterceptorHelper;
-    private ServletServerRequestWrapperFactory serverRequestTraceFactory;
+    private ServletServerRequestWrapperFactory servletServerRequestWrapperFactory;
 
-    public ResinServletRequestListener(TraceContext traceContext) {
-        final ResinConfig config = new ResinConfig(traceContext.getProfilerConfig());
+    public WeblogicServletRequestListener(TraceContext traceContext) {
+        Assert.requireNonNull(traceContext, "traceContext must not be null");
+        final WeblogicConfiguration config = new WeblogicConfiguration(traceContext.getProfilerConfig());
         final RemoteAddressResolver remoteAddressResolver = RemoteAddressResolverFactory.newRemoteAddressResolver(config.getRealIpHeader(), config.getRealIpEmptyValue());
-        this.serverRequestTraceFactory = new ServletServerRequestWrapperFactory(remoteAddressResolver);
+        this.servletServerRequestWrapperFactory = new ServletServerRequestWrapperFactory(remoteAddressResolver);
         this.servletRequestListenerInterceptorHelper = new ServletRequestListenerInterceptorHelper(traceContext, config.getExcludeUrlFilter(), config.getExcludeProfileMethodFilter(), config.isTraceRequestParam());
     }
 
@@ -71,16 +73,15 @@ public class ResinServletRequestListener implements ServletRequestListener {
             }
             return;
         }
-
         try {
             final HttpServletRequest request = (HttpServletRequest) servletRequest;
-            final ServletServerRequestWrapper serverRequestWrapper = this.serverRequestTraceFactory.get(new RequestWrapper() {
+            final ServletServerRequestWrapper serverRequestWrapper = this.servletServerRequestWrapperFactory.get(new RequestWrapper() {
                 @Override
                 public String getHeader(String name) {
                     return request.getHeader(name);
                 }
             }, request.getRequestURI(), request.getServerName(), request.getServerPort(), request.getRemoteAddr(), request.getRequestURL(), request.getMethod(), request.getParameterMap());
-            this.servletRequestListenerInterceptorHelper.initialized(serverRequestWrapper, ResinConstants.RESIN);
+            this.servletRequestListenerInterceptorHelper.initialized(serverRequestWrapper, WeblogicConstants.WEBLOGIC);
 
         } catch (Throwable t) {
             if (isInfo) {
@@ -104,9 +105,7 @@ public class ResinServletRequestListener implements ServletRequestListener {
         final ServletRequest servletRequest = servletRequestEvent.getServletRequest();
         if (!(servletRequest instanceof HttpServletRequest)) {
             if (isInfo) {
-                if (isInfo) {
-                    logger.info("Invalid request. Request must implement the javax.servlet.http.HttpServletRequest interface. event={}, request={}", servletRequestEvent, servletRequest);
-                }
+                logger.info("Invalid request. Request must implement the javax.servlet.http.HttpServletRequest interface. event={}, request={}", servletRequestEvent, servletRequest);
             }
             return;
         }
@@ -114,19 +113,16 @@ public class ResinServletRequestListener implements ServletRequestListener {
             final HttpServletRequest request = (HttpServletRequest) servletRequest;
             final Throwable throwable = getException(request);
             final int statusCode = getStatusCode(request);
-            // Do not trace close
             this.servletRequestListenerInterceptorHelper.destroyed(throwable, statusCode, false);
         } catch (Throwable t) {
-            if (isInfo) {
-                logger.info("Failed to servlet request event handle. event={}", servletRequestEvent, t);
-            }
+            logger.info("Failed to servlet request event handle. event={}", servletRequestEvent, t);
         }
     }
 
     private int getStatusCode(final HttpServletRequest httpServletRequest) {
         try {
-            if (httpServletRequest instanceof HttpServletRequestImpl) {
-                return ((HttpServletRequestImpl) httpServletRequest).getResponse().getStatus();
+            if (httpServletRequest instanceof ServletRequestImpl) {
+                return ((ServletRequestImpl) httpServletRequest).getResponse().getStatus();
             }
         } catch (Exception ignored) {
         }

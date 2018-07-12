@@ -61,7 +61,11 @@ public class PinpointClientFactoryProvider implements Provider<PinpointClientFac
 
     public PinpointClientFactory get() {
         PinpointClientFactory pinpointClientFactory = new DefaultPinpointClientFactory(connectionFactoryProvider.get());
-        pinpointClientFactory.setTimeoutMillis(1000 * 5);
+        pinpointClientFactory.setWriteTimeoutMillis(profilerConfig.getTcpDataSenderPinpointClientWriteTimeout());
+        pinpointClientFactory.setRequestTimeoutMillis(profilerConfig.getTcpDataSenderPinpointClientRequestTimeout());
+        pinpointClientFactory.setReconnectDelay(profilerConfig.getTcpDataSenderPinpointClientReconnectInterval());
+        pinpointClientFactory.setPingDelay(profilerConfig.getTcpDataSenderPinpointClientPingInterval());
+        pinpointClientFactory.setEnableWorkerPacketDelay(profilerConfig.getTcpDataSenderPinpointClientHandshakeInterval());
 
         AgentInformation agentInformation = this.agentInformation.get();
         Map<String, Object> properties = toMap(agentInformation);
