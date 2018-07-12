@@ -1,12 +1,12 @@
 # Number of days of inactivity before an issue becomes stale
-daysUntilStale: 30
+daysUntilStale: 0
 # Number of days of inactivity before a stale issue is closed
-daysUntilClose: 20
+daysUntilClose: 0
 # Issues with these labels will never be considered stale
 exemptLabels:
 
 # Set to true to ignore issues in a milestone (defaults to false)
-#exemptMilestones: true
+exemptMilestones: true
 
 # Limit to only `issues` or `pulls`
 only: issues
