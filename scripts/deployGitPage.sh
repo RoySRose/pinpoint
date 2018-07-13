@@ -21,12 +21,10 @@ git clone --quiet --branch=gh-pages https://${GH_TOKEN}@github.com/RoySRose/pinp
 cd gh-pages
 cp -Rf $HOME/docs/* ./pages
 
-echo "Allow files with underscore https://help.github.com/articles/files-that-start-with-an-underscore-are-missing/" > .nojekyll
-echo "[View live](https://${GH_USER}.github.io/${GH_REPO}/)" > README.md
-
 #add, commit and push files
 git add -f .
-git commit -m "Auto build with Travis $TRAVIS_BUILD_NUMBER"
+git commit -m "Auto commit by TRAVIS $TRAVIS_BUILD_NUMBER"
+
 git push -fq origin gh-pages > /dev/null
 
 echo "Done updating gh-pages\n"
