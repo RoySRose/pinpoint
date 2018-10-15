@@ -25,7 +25,7 @@ import com.navercorp.pinpoint.bootstrap.context.ServiceInfo;
 import com.navercorp.pinpoint.bootstrap.context.TraceContext;
 import com.navercorp.pinpoint.bootstrap.plugin.test.Expectations;
 import com.navercorp.pinpoint.bootstrap.plugin.test.ExpectedAnnotation;
-import com.navercorp.pinpoint.bootstrap.plugin.test.ExpectedJson;
+import com.navercorp.pinpoint.bootstrap.plugin.test.ExpectedMongoJson;
 import com.navercorp.pinpoint.bootstrap.plugin.test.ExpectedSql;
 import com.navercorp.pinpoint.bootstrap.plugin.test.ExpectedTrace;
 import com.navercorp.pinpoint.bootstrap.plugin.test.PluginTestVerifier;
@@ -474,7 +474,7 @@ public class PluginVerifierExternalAdaptor implements PluginTestVerifier {
 
         @Override
         public Integer getNextAsyncId() {
-            return spanEvent.getAsyncIdObject() != null ? spanEvent.getAsyncIdObject().getAsyncId(): null;
+            return spanEvent.getAsyncIdObject() != null ? spanEvent.getAsyncIdObject().getAsyncId() : null;
         }
 
         @Override
@@ -681,8 +681,8 @@ public class PluginVerifierExternalAdaptor implements PluginTestVerifier {
 
             if (expectedAnnotationKey == AnnotationKey.SQL_ID && expect instanceof ExpectedSql) {
                 verifySql((ExpectedSql) expect, actualAnnotation);
-            } else if (expectedAnnotationKey == AnnotationKey.JSON && expect instanceof ExpectedJson) {
-                verifyJson((ExpectedJson) expect, actualAnnotation);
+            } else if (expectedAnnotationKey == AnnotationKey.MONGO_JSON && expect instanceof ExpectedMongoJson) {
+                verifyMongoJson((ExpectedMongoJson) expect, actualAnnotation);
             } else {
                 Object expectedValue = expect.getValue();
 
@@ -737,15 +737,15 @@ public class PluginVerifierExternalAdaptor implements PluginTestVerifier {
         }
     }
 
-    private void verifyJson(ExpectedJson expected, Annotation actual) {
+    private void verifyMongoJson(ExpectedMongoJson expected, Annotation actual) {
         StringStringValue value = ((StringStringValue) actual.getValue());
 
         if (!Objects.equal(value.getStringValue1(), expected.getQuery())) {
             throw new AssertionError("Expected json with query [" + expected.getQuery() + "] but was [" + value.getStringValue1() + "], expected: " + expected + ", was: " + actual);
         }
 
-        if (!Objects.equal(value.getStringValue2(), expected.getOutput())) {
-            throw new AssertionError("Expected json with output [" + expected.getOutput() + "] but was [" + value.getStringValue2() + "], expected: " + expected + ", was: " + actual);
+        if (!Objects.equal(value.getStringValue2(), expected.getBindValue())) {
+            throw new AssertionError("Expected json with output [" + expected.getBindValue() + "] but was [" + value.getStringValue2() + "], expected: " + expected + ", was: " + actual);
         }
     }
 
@@ -788,7 +788,8 @@ public class PluginVerifierExternalAdaptor implements PluginTestVerifier {
 
     private TestTcpDataSender getTestTcpDataSender() {
         Injector injector = getInjector();
-        TypeLiteral<EnhancedDataSender<Object>> dataSenderTypeLiteral = new TypeLiteral<EnhancedDataSender<Object>>() {};
+        TypeLiteral<EnhancedDataSender<Object>> dataSenderTypeLiteral = new TypeLiteral<EnhancedDataSender<Object>>() {
+        };
         Key<EnhancedDataSender<Object>> dataSenderKey = Key.get(dataSenderTypeLiteral);
         EnhancedDataSender dataSender = injector.getInstance(dataSenderKey);
         if (dataSender instanceof TestTcpDataSender) {
