@@ -97,7 +97,7 @@ public class MongoDriverConnectInterceptor3_0 extends SpanEventSimpleAroundInter
 
     private DatabaseInfo createDatabaseInfo(List<String> hostList, String readPreference, String writeConcern) {
 
-        DatabaseInfo databaseInfo = new MongoDatabaseInfo(MongoConstants.MONGO, MongoConstants.MONGO_EXECUTE_QUERY,
+        DatabaseInfo databaseInfo = new MongoDatabaseInfo(MongoConstants.MONGODB, MongoConstants.MONGO_EXECUTE_QUERY,
                 null, null, hostList, null, null, readPreference, writeConcern);
 
         if (isDebug) {
