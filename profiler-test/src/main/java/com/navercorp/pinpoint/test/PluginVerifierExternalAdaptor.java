@@ -25,7 +25,6 @@ import com.navercorp.pinpoint.bootstrap.context.ServiceInfo;
 import com.navercorp.pinpoint.bootstrap.context.TraceContext;
 import com.navercorp.pinpoint.bootstrap.plugin.test.Expectations;
 import com.navercorp.pinpoint.bootstrap.plugin.test.ExpectedAnnotation;
-import com.navercorp.pinpoint.bootstrap.plugin.test.ExpectedMongoJson;
 import com.navercorp.pinpoint.bootstrap.plugin.test.ExpectedSql;
 import com.navercorp.pinpoint.bootstrap.plugin.test.ExpectedTrace;
 import com.navercorp.pinpoint.bootstrap.plugin.test.PluginTestVerifier;
@@ -40,7 +39,6 @@ import com.navercorp.pinpoint.common.util.ArrayUtils;
 import com.navercorp.pinpoint.common.util.Assert;
 import com.navercorp.pinpoint.common.util.IntStringStringValue;
 import com.navercorp.pinpoint.common.util.IntStringValue;
-import com.navercorp.pinpoint.common.util.StringStringValue;
 import com.navercorp.pinpoint.common.util.StringUtils;
 import com.navercorp.pinpoint.profiler.context.Annotation;
 import com.navercorp.pinpoint.profiler.context.DefaultLocalAsyncId;
@@ -676,13 +674,11 @@ public class PluginVerifierExternalAdaptor implements PluginTestVerifier {
             Annotation actualAnnotation = actualAnnotations.get(i);
 
             if (expectedAnnotationKey.getCode() != actualAnnotation.getAnnotationKey()) {
-                throw new AssertionError("Expected " + i + "th annotation [" + expectedAnnotationKey.getCode() + "=" + expect.getValue() + "] but was [" + toString(actualAnnotation) + "], expected: " + expected + ", was: " + actual);
+                throw new AssertionError("Code Different, Expected " + i + "th annotation [" + expectedAnnotationKey.getCode() + "=" + expect.getValue() + "] but was [" + toString(actualAnnotation) + "], expected: " + expected + ", was: " + actual);
             }
 
             if (expectedAnnotationKey == AnnotationKey.SQL_ID && expect instanceof ExpectedSql) {
                 verifySql((ExpectedSql) expect, actualAnnotation);
-            } else if (expectedAnnotationKey == AnnotationKey.MONGO_JSON && expect instanceof ExpectedMongoJson) {
-                verifyMongoJson((ExpectedMongoJson) expect, actualAnnotation);
             } else {
                 Object expectedValue = expect.getValue();
 
@@ -695,7 +691,8 @@ public class PluginVerifierExternalAdaptor implements PluginTestVerifier {
                 }
 
                 if (!Objects.equal(expectedValue, actualAnnotation.getValue())) {
-                    throw new AssertionError("Expected " + i + "th annotation [" + expectedAnnotationKey.getCode() + "=" + expect.getValue() + "] but was [" + toString(actualAnnotation) + "], expected: " + expected + ", was: " + actual);
+
+                    throw new AssertionError("Value Different, Expected " + i + "th annotation [" + expectedAnnotationKey.getCode() + "=" + expect.getValue() + "] but was [" + toString(actualAnnotation) + "], expected: " + expected + ", was: " + actual);
                 }
             }
         }
@@ -734,18 +731,6 @@ public class PluginVerifierExternalAdaptor implements PluginTestVerifier {
 
         if (!Objects.equal(value.getStringValue2(), expected.getBindValuesAsString())) {
             throw new AssertionError("Expected sql with bindValues [" + expected.getBindValuesAsString() + "] but was [" + value.getStringValue2() + "], expected: " + expected + ", was: " + actual);
-        }
-    }
-
-    private void verifyMongoJson(ExpectedMongoJson expected, Annotation actual) {
-        StringStringValue value = ((StringStringValue) actual.getValue());
-
-        if (!Objects.equal(value.getStringValue1(), expected.getQuery())) {
-            throw new AssertionError("Expected json with query [" + expected.getQuery() + "] but was [" + value.getStringValue1() + "], expected: " + expected + ", was: " + actual);
-        }
-
-        if (!Objects.equal(value.getStringValue2(), expected.getBindValue())) {
-            throw new AssertionError("Expected json with output [" + expected.getBindValue() + "] but was [" + value.getStringValue2() + "], expected: " + expected + ", was: " + actual);
         }
     }
 
@@ -894,6 +879,4 @@ public class PluginVerifierExternalAdaptor implements PluginTestVerifier {
 
         }
     }
-
-
 }

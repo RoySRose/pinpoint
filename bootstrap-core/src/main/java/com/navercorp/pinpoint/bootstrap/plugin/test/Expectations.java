@@ -116,8 +116,4 @@ public final class Expectations {
     public static ExpectedAnnotation sql(String query, String output, Object... bindValues) {
         return new ExpectedSql(query, output, bindValues);
     }
-
-    public static ExpectedAnnotation mongoJson(String query, String output) {
-        return new ExpectedMongoJson(query, output);
-    }
 }

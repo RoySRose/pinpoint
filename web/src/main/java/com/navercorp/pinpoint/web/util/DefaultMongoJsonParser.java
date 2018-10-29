@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package com.navercorp.pinpoint.common.util;
+package com.navercorp.pinpoint.web.util;
+
+import com.navercorp.pinpoint.common.util.CollectionUtils;
+import com.navercorp.pinpoint.common.util.StringUtils;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Stack;
 
 /**
  * @author Roy Kim
  */
 public class DefaultMongoJsonParser implements MongoJsonParser {
 
-    public static final char SEPARATOR = ',';
     private static final int NEXT_TOKEN_NOT_EXIST = -1;
 
     public DefaultMongoJsonParser() {

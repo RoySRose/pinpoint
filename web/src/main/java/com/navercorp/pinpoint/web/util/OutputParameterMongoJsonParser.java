@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.navercorp.pinpoint.common.util;
+package com.navercorp.pinpoint.web.util;
+
+import com.navercorp.pinpoint.common.util.StringUtils;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -26,7 +28,7 @@ import java.util.Stack;
  */
 public class OutputParameterMongoJsonParser {
 
-    public static final char SEPARATOR = DefaultMongoJsonParser.SEPARATOR;
+    public static final char SEPARATOR = ',';
     public static final char ARRAYMARK = '[';
     public static final char CLASSMARK = '{';
 

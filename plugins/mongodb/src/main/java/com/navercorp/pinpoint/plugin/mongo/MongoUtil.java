@@ -45,7 +45,7 @@ public class MongoUtil {
         if (readPreferenceOrWriteConcern != null) {
             input.append(",").append(readPreferenceOrWriteConcern);
         }
-        recorder.recordAttribute(AnnotationKey.MONGO_COLLECTIONINFO, input);
+        recorder.recordAttribute(MongoConstants.MONGO_COLLECTION_INFO, input);
     }
 
     public static String getWriteConcern0(WriteConcern writeConcern) {
@@ -76,7 +76,7 @@ public class MongoUtil {
 
     public static void recordParsedBson(SpanEventRecorder recorder, StringStringValue stringStringValue) {
         if (stringStringValue != null) {
-            recorder.recordAttribute(AnnotationKey.MONGO_JSON, stringStringValue);
+            recorder.recordAttribute(MongoConstants.MONGO_JSON, stringStringValue);
         }
     }
 
