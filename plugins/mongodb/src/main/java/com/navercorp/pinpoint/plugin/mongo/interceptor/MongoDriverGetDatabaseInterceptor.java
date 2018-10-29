@@ -64,7 +64,7 @@ public class MongoDriverGetDatabaseInterceptor implements AroundInterceptor {
             databaseInfo = UnKnownDatabaseInfo.INSTANCE;
         }
 
-        databaseInfo = new MongoDatabaseInfo(MongoConstants.MONGO, MongoConstants.MONGO_EXECUTE_QUERY,
+        databaseInfo = new MongoDatabaseInfo(MongoConstants.MONGODB, MongoConstants.MONGO_EXECUTE_QUERY,
                 null, null, databaseInfo.getHost(), args[0].toString(), null, ((MongoDatabaseInfo) databaseInfo).getReadPreference(), ((MongoDatabaseInfo) databaseInfo).getWriteConcern());
 
         if (result instanceof DatabaseInfoAccessor) {

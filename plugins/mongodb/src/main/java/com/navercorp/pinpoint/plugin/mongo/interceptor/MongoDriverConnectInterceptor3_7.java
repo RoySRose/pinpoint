@@ -62,10 +62,9 @@ public class MongoDriverConnectInterceptor3_7 extends SpanEventSimpleAroundInter
                                   Throwable throwable) {
 
         final boolean success = InterceptorUtils.isSuccess(throwable);
+        // Must not check if current transaction is trace target or not. Connection can be made by other thread.
 
         if (success) {
-            // Must not check if current transaction is trace target or not. Connection can be made by other thread.
-
             if (args == null) {
                 return;
             }
@@ -75,7 +74,6 @@ public class MongoDriverConnectInterceptor3_7 extends SpanEventSimpleAroundInter
             String writeConcern = getWriteConcern(args[0]);
 
             DatabaseInfo databaseInfo = createDatabaseInfo(hostList, readPreference, writeConcern);
-
             if (databaseInfo == null) {
                 databaseInfo = UnKnownDatabaseInfo.INSTANCE;
             }
@@ -95,7 +93,7 @@ public class MongoDriverConnectInterceptor3_7 extends SpanEventSimpleAroundInter
 
     private DatabaseInfo createDatabaseInfo(List<String> hostList, String readPreference, String writeConcern) {
 
-        DatabaseInfo databaseInfo = new MongoDatabaseInfo(MongoConstants.MONGO, MongoConstants.MONGO_EXECUTE_QUERY,
+        DatabaseInfo databaseInfo = new MongoDatabaseInfo(MongoConstants.MONGODB, MongoConstants.MONGO_EXECUTE_QUERY,
                 null, null, hostList, null, null, readPreference, writeConcern);
 
         if (isDebug) {
