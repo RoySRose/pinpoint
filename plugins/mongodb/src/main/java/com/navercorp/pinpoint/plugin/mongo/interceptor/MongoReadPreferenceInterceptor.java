@@ -64,7 +64,7 @@ public class MongoReadPreferenceInterceptor implements AroundInterceptor {
             databaseInfo = UnKnownDatabaseInfo.INSTANCE;
         }
 
-        String readPreference = ((ReadPreference) args[0]).getName().toUpperCase();
+        String readPreference = ((ReadPreference) args[0]).getName();
 
         databaseInfo = new MongoDatabaseInfo(databaseInfo.getType(), databaseInfo.getExecuteQueryType()
                 , databaseInfo.getRealUrl(), databaseInfo.getUrl(), databaseInfo.getHost(), databaseInfo.getDatabaseId()
