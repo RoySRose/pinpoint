@@ -25,15 +25,13 @@ import com.navercorp.pinpoint.common.server.bo.StringMetaDataBo;
 import com.navercorp.pinpoint.common.server.util.AnnotationUtils;
 import com.navercorp.pinpoint.common.trace.AnnotationKey;
 import com.navercorp.pinpoint.common.util.AnnotationKeyUtils;
-import com.navercorp.pinpoint.common.util.DefaultMongoJsonParser;
 import com.navercorp.pinpoint.common.util.DefaultSqlParser;
 import com.navercorp.pinpoint.common.util.IntStringStringValue;
-import com.navercorp.pinpoint.common.util.MongoJsonParser;
-import com.navercorp.pinpoint.common.util.OutputParameterMongoJsonParser;
 import com.navercorp.pinpoint.common.util.OutputParameterParser;
 import com.navercorp.pinpoint.common.util.SqlParser;
 import com.navercorp.pinpoint.common.util.StringStringValue;
 import com.navercorp.pinpoint.common.util.TransactionId;
+import com.navercorp.pinpoint.plugin.mongo.MongoConstants;
 import com.navercorp.pinpoint.web.calltree.span.CallTree;
 import com.navercorp.pinpoint.web.calltree.span.CallTreeIterator;
 import com.navercorp.pinpoint.web.calltree.span.SpanAlign;
@@ -82,7 +80,6 @@ public class SpanServiceImpl implements SpanService {
 
     private final SqlParser sqlParser = new DefaultSqlParser();
     private final OutputParameterParser outputParameterParser = new OutputParameterParser();
-    private final OutputParameterMongoJsonParser outputParameterMongoJsonParser = new OutputParameterMongoJsonParser();
 
     public void setSqlMetaDataDao(SqlMetaDataDao sqlMetaDataDao) {
         this.sqlMetaDataDao = sqlMetaDataDao;
@@ -213,18 +210,21 @@ public class SpanServiceImpl implements SpanService {
         this.transitionAnnotation(spans, new AnnotationReplacementCallback() {
             @Override
             public void replacement(SpanAlign spanAlign, List<AnnotationBo> annotationBoList) {
-                AnnotationBo collectionInfo = findAnnotation(annotationBoList, AnnotationKey.MONGO_COLLECTIONINFO.getCode());
+                AnnotationBo collectionInfo = findAnnotation(annotationBoList, MongoConstants.MONGO_COLLECTION_INFO.getCode());
+
                 if (collectionInfo != null) {
                     StringBuilder stringBuilder = new StringBuilder();
-                    stringBuilder.append(spanAlign.getDestinationId()).append(".").append((String) collectionInfo.getValue());
+                    stringBuilder.append(spanAlign.getDestinationId())
+                            .append(".")
+                            .append((String) collectionInfo.getValue());
+
                     collectionInfo.setValue(stringBuilder);
                 }
 
-                AnnotationBo jsonAnnotation = findAnnotation(annotationBoList, AnnotationKey.MONGO_JSON.getCode());
+                AnnotationBo jsonAnnotation = findAnnotation(annotationBoList, MongoConstants.MONGO_JSON.getCode());
                 if (jsonAnnotation == null) {
                     return;
                 }
-                System.out.println("what: " + jsonAnnotation);
 
                 final StringStringValue jsonValue = (StringStringValue) jsonAnnotation.getValue();
 
@@ -235,14 +235,14 @@ public class SpanServiceImpl implements SpanService {
                     logger.debug("No values in Json:{}", json);
                 } else {
                     AnnotationBo jsonMeta = new AnnotationBo();
-                    jsonMeta.setKey(AnnotationKey.MONGO_JSON.getCode());
+                    jsonMeta.setKey(MongoConstants.MONGO_JSON.getCode());
                     jsonMeta.setValue(json);
                     annotationBoList.add(jsonMeta);
                 }
 
                 if (StringUtils.isNotEmpty(jsonbindValue)) {
                     AnnotationBo bindValueAnnotation = new AnnotationBo();
-                    bindValueAnnotation.setKey(AnnotationKey.MONGO_JSON_BINDVALUE.getCode());
+                    bindValueAnnotation.setKey(MongoConstants.MONGO_JSON_BINDVALUE.getCode());
                     bindValueAnnotation.setValue(jsonbindValue);
                     annotationBoList.add(bindValueAnnotation);
                 }
