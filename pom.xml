@@ -72,6 +72,7 @@
         <module>testcase</module>
         <module>batch</module>
         <module>report</module>
+        <module>api-server</module>
     </modules>
 
     <properties>
@@ -1230,10 +1231,17 @@
         </profile>
 
         <profile>
+<<<<<<< HEAD
             <id>code.coverage</id>
             <properties>
                 <plugin.jacoco.skip>false</plugin.jacoco.skip>
             </properties>
+=======
+            <id>api</id>
+            <modules>
+                <module>api-server</module>
+            </modules>
+>>>>>>> [Initial commit] api server for retrieving data
         </profile>
 
         <profile>

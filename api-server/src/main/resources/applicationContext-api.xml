@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+
+    <context:component-scan base-package="com.navercorp.pinpoint.common.server.util
+                                          ,com.navercorp.pinpoint.web.mapper
+                                          ,com.navercorp.pinpoint.web.dao.hbase
+                                          ,com.navercorp.pinpoint.api.controller
+                                          ,com.navercorp.pinpoint.api.service
+                                          ,com.navercorp.pinpoint.api.dao
+                                          ,com.navercorp.pinpoint.api.mapper
+                                          ,com.navercorp.pinpoint.web.util"/>
+
+    <context:component-scan base-package="com.navercorp.pinpoint.web.service">
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.AgentServiceImpl"/>
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.AgentEventServiceImpl"/>
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.AgentEventService"/>
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.AgentInfoServiceImpl"/>
+        <context:exclude-filter type="regex"
+                                expression="com.navercorp.pinpoint.web.service.AgentStatisticsServiceImpl"/>
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.AlarmServiceImpl"/>
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.FilteredMapServiceImpl"/>
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.MapServiceImpl"/>
+        <!--        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.ProxyRequestTypeRegistryServiceImpl"/>-->
+        <context:exclude-filter type="regex"
+                                expression="com.navercorp.pinpoint.web.service.ResponseTimeHistogramServiceImpl"/>
+        <!--        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.TransactionInfoServiceImpl"/>-->
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.UserGroupServiceImpl"/>
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.UserServiceImpl"/>
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.map.*"/>
+    </context:component-scan>
+
+    <!--    com.navercorp.pinpoint.web.filter,-->
+    <!--    com.navercorp.pinpoint.web.view,-->
+    <!--    com.navercorp.pinpoint.web.applicationmap,-->
+    <context:component-scan base-package="com.navercorp.pinpoint.common.server.bo">
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.common.server.bo.thrift.*"/>
+    </context:component-scan>
+
+    <bean id="apiPropertyConfigurer" class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:hbase-root.properties</value>
+                <value>classpath:pinpoint-api-root.properties</value>
+                <!-- override configuration -->
+                <value>classpath:profiles/${pinpoint.profiles.active}/hbase.properties</value>
+                <value>classpath:profiles/${pinpoint.profiles.active}/pinpoint-api.properties</value>
+                <!-- external property for override -->
+                <value>
+                    file:#{ systemProperties['pinpoint.api.config.location'] ?: '-Dpinpoint.api.config.location does not set' }
+                </value>
+            </list>
+        </property>
+
+        <property name="fileEncoding" value="UTF-8"/>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name="ignoreResourceNotFound" value="true"/>
+    </bean>
+
+    <!--    <bean id="pinpointApiProps" class="org.springframework.beans.factory.config.PropertiesFactoryBean">-->
+    <!--        <property name="location" value="classpath:api-root.properties"/>-->
+    <!--    </bean>-->
+
+    <import resource="classpath:applicationContext-api-profile.xml"/>
+    <import resource="classpath:applicationContext-api-hbase.xml"/>
+    <!--    <import resource="classpath:applicationContext-web-datasource.xml" />-->
+    <!--    <import resource="classpath:applicationContext-web-dao-config.xml" />-->
+    <!--    <import resource="classpath:applicationContext-web-cache.xml" />-->
+    <import resource="classpath:applicationContext-api-websocket.xml"/>
+    <import resource="classpath:applicationContext-web-namespace.xml"/>
+
+    <!--    <bean id="jsonObjectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"/>-->
+
+    <bean id="rangeFactory" class="com.navercorp.pinpoint.web.vo.RangeFactory"/>
+
+    <bean id="timeSlot" class="com.navercorp.pinpoint.common.server.util.DefaultTimeSlot"/>
+
+    <bean id="webConfig" class="com.navercorp.pinpoint.web.config.WebConfig"/>
+    <bean id="configProperties" class="com.navercorp.pinpoint.web.config.ConfigProperties"/>
+    <bean id="logConfiguration" class="com.navercorp.pinpoint.web.config.LogConfiguration"/>
+    <!--    <bean id="webSocketConfig" class="com.navercorp.pinpoint.web.config.WebSocketConfig"/>-->
+
+    <!--    <bean id="clusterConnectionManager" class="com.navercorp.pinpoint.web.cluster.connection.ClusterConnectionManager">-->
+    <!--        <constructor-arg ref="webConfig" />-->
+    <!--    </bean>-->
+
+    <!--    <bean id="clusterDataManager" class="com.navercorp.pinpoint.web.cluster.zookeeper.ZookeeperClusterDataManager">-->
+    <!--        <constructor-arg ref="webConfig" />-->
+    <!--    </bean>-->
+
+    <!--    <bean id="clusterManager" class="com.navercorp.pinpoint.web.cluster.ClusterManager">-->
+    <!--        <constructor-arg ref="webConfig" />-->
+    <!--    </bean>-->
+
+    <bean id="agentEventMessageDeserializerV1"
+          class="com.navercorp.pinpoint.common.server.util.AgentEventMessageDeserializerV1"/>
+
+    <bean id="slf4jCommonLoggerFactory" class="com.navercorp.pinpoint.common.server.util.Slf4jCommonLoggerFactory">
+    </bean>
+
+    <bean id="typeLoaderService" class="com.navercorp.pinpoint.common.server.util.ServerTraceMetadataLoaderService">
+        <constructor-arg index="0" ref="slf4jCommonLoggerFactory"/>
+    </bean>
+
+    <bean id="serviceTypeRegistryService"
+          class="com.navercorp.pinpoint.loader.service.DefaultServiceTypeRegistryService">
+        <constructor-arg ref="typeLoaderService"/>
+    </bean>
+
+    <bean id="annotationKeyRegistryService"
+          class="com.navercorp.pinpoint.loader.service.DefaultAnnotationKeyRegistryService">
+        <constructor-arg ref="typeLoaderService"/>
+    </bean>
+
+    <bean id="hbaseSqlMetaDataDao" class="com.navercorp.pinpoint.web.dao.hbase.HbaseSqlMetaDataDao">
+    </bean>
+
+    <bean id="sqlMetaDataMapper" class="com.navercorp.pinpoint.web.mapper.SqlMetaDataMapper">
+        <constructor-arg ref="metadataRowKeyDistributor"/>
+    </bean>
+
+    <bean id="sqlMetaDataMapper2" class="com.navercorp.pinpoint.web.mapper.SqlMetaDataMapper">
+        <constructor-arg ref="metadataRowKeyDistributor2"/>
+    </bean>
+
+</beans>

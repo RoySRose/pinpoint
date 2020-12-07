@@ -1,0 +1,142 @@
+# OpenAPI 3 has quite a difference with OpenAPI 2, the way the linter works in the editor will be based on this.
+openapi: 3.0.0
+
+# This section will contain metadata information about the API. It will be shown on the editor/UI when we publish this
+info:
+  title: To-Do Board API
+  version: 1.0.0
+  description: API specification to support daily to-do list operations
+
+# The list of the servers that we can use to use the API. This will be rendered as a combo box in the editor/UI when we publish it, so the user could pick and use the endpoint they prefer.
+servers:
+  - url: http://dev-api.todoboard.com/v1
+    description: DEV-ENV
+  - url: http://api.todoboard.com/v1
+    description: PROD-ENV
+
+paths:
+  /api/applications: # the API path in which the operation will be performed. When this endpoint triggered, the operation meant to be executed.
+    get: # the HTTP method
+      operationId: getApplicationAgentsList # optional unique string used to identify an operation. When the code generated, this will be the method name.
+      tags:
+        - Application # group operations logically by resources or any other qualifier. In the context of spring code generation, tags is going to be the class name.
+      description: retrieve all available applications
+      responses:
+        200:
+          description: successfully retrieved all projects
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/transactionmetadata/{requestparam}:
+    get:
+      operationId: transactionmetadata
+      tags:
+        - Application
+      description: retrieve transactionmetadata
+      parameters:
+        - name: requestparam
+          in: path
+          description: requestparam
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successfully retrieved all transactionmetadata
+          content:
+            application/json:
+              schema:
+                type: object
+
+
+
+    #  /projects: # the API path in which the operation will be performed. When this endpoint triggered, the operation meant to be executed.
+    #    get: # the HTTP method
+    #      parameters:
+    #        - in: query
+    #          description: find project by name
+    #          name: name
+    #          schema:
+    #            type: string
+    #      operationId: searchProjects # optional unique string used to identify an operation. When the code generated, this will be the method name.
+    #      tags:
+    #        - Projects # group operations logically by resources or any other qualifier. In the context of spring code generation, tags is going to be the class name.
+    #      description: retrieve all available projects in paginated way
+    #      responses:
+    #        200:
+    #          description: successfully retrieved all projects
+    #          content:
+    #            application/json:
+    #              schema:
+    #                type: array
+    #                items:
+    #                  $ref: '#/components/schemas/ProjectResponse'
+    #
+    #  /projects/{projectId}:
+    #    get:
+    #      operationId: getProject
+    #      tags:
+    #        - Projects
+    #      description: retrieve a project by id
+    #      parameters:
+    #        - name: projectId
+    #          in: path
+    #          schema:
+    #            type: integer
+    #            format: int64
+    #            minimum: 1
+    #          required: true
+    #          allowEmptyValue: false
+    #          example: 1
+    #
+    #      responses:
+    #        200:
+    #          description: the specific project successfully retrieved
+    #          content:
+    #            application/json:
+    #              schema:
+    #                $ref: '#/components/schemas/ProjectResponse'
+
+    #components:
+    #  schemas:
+    #    ProjectResponse:
+    #      type: object
+    #      properties:
+    #        id:
+    #          type: integer
+    #          format: int64
+    #          description: unique id of the project for the identifier
+    #          example: 1
+    #        name:
+    #          type: string
+    #          description: the name of the project
+    #          example: To-do Application Development
+
+
+
+
+    #    ApplicationAgentsList:
+#      type: object
+#    ApplicationAgentsList:
+#      title: ApplicationAgentsList
+#      type: object
+#      properties:
+#        typeAlias:
+#          $ref: '#/components/schemas/ApplicationAgentsList'
+
+
+
+
+#    ApplicationAgentsList:
+#      type: string
+#      items:
+#        type: string
+#      properties:
+#        applicationName:
+#          type: string
+#          description: List of applicationName
+#          example: app1,app2
+
