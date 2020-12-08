@@ -150,11 +150,15 @@ public class HbaseTraceDaoV2 implements TraceDao {
     }
 
     List<List<SpanBo>> selectSpans(List<GetTraceInfo> getTraceInfoList, int eachPartitionSize) {
+
         if (CollectionUtils.isEmpty(getTraceInfoList)) {
+            logger.info("getTraceInfoList empty");
             return Collections.emptyList();
         }
 
+        logger.info("partition size = " + eachPartitionSize);
         List<List<GetTraceInfo>> partitionGetTraceInfoList = partition(getTraceInfoList, eachPartitionSize);
+        logger.info("partition finished size = " + partitionGetTraceInfoList.size());
         return partitionSelect(partitionGetTraceInfoList, descriptor.getColumnFamilyName(), spanFilter);
     }
 
@@ -198,8 +202,23 @@ public class HbaseTraceDaoV2 implements TraceDao {
         Objects.requireNonNull(columnFamily, "columnFamily");
 
         List<List<SpanBo>> spanBoList = new ArrayList<>();
+
+        int iter=0;
+        long start = 0;
+
         for (List<GetTraceInfo> getTraceInfoList : partitionGetTraceInfoList) {
+
+            if (iter % 100 == 0)
+                start = System.currentTimeMillis();
+
             List<List<SpanBo>> result = bulkSelect(getTraceInfoList, columnFamily, filter);
+
+            if (iter % 100 == 0) {
+                final long time = System.currentTimeMillis() - start;
+                logger.info(iter++ + "th execution time:{}ms ", time);
+            }
+            iter++;
+
             spanBoList.addAll(result);
         }
         return spanBoList;

@@ -195,7 +195,7 @@ public class HbaseApplicationTraceListDao implements ApplicationTraceListDao {
 
         TransactionIdListBuilder transactionIdListBuilder = new TransactionIdListBuilder();
 
-        int iter = 1;
+        int iter = 0;
 
         while (true) {
 
@@ -207,7 +207,10 @@ public class HbaseApplicationTraceListDao implements ApplicationTraceListDao {
             //        }
             boolean scanBackward = true;
 
-            logger.debug("creating scan " + iter++);
+            if (iter % 100 == 0)
+                logger.info("creating scan " + iter);
+            iter++;
+
             Scan scan = createScan(applicationName, range, scanBackward);
 
             TableName applicationTraceIndexTableName = descriptor.getTableName();
@@ -233,11 +236,14 @@ public class HbaseApplicationTraceListDao implements ApplicationTraceListDao {
 
             logger.debug("scanning transaction list " + (endTime - startTime) + " milliseconds");
 
+            if (iter % 1 == 0)
+                break;
+
             if (transactionIdList.size() < limit || transactionIdList.size() == 0)
                 break;
         }
 
-        logger.debug("scanning transaction list finished : " + transactionIdListBuilder.getTransactionIdList().size());
+        logger.info("scanning transaction list finished : " + transactionIdListBuilder.getTransactionIdList().size());
 
         return transactionIdListBuilder.build();
     }

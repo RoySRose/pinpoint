@@ -10,26 +10,28 @@
 
     <context:component-scan base-package="com.navercorp.pinpoint.common.server.util
                                           ,com.navercorp.pinpoint.web.mapper
-                                          ,com.navercorp.pinpoint.web.dao.hbase
                                           ,com.navercorp.pinpoint.api.controller
                                           ,com.navercorp.pinpoint.api.service
                                           ,com.navercorp.pinpoint.api.dao
                                           ,com.navercorp.pinpoint.api.mapper
                                           ,com.navercorp.pinpoint.web.util"/>
 
+    <context:component-scan base-package="com.navercorp.pinpoint.web.dao.hbase">
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.dao.hbase.HbaseTraceDaoFactory"/>
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.dao.hbase.HbaseTraceDaoV2"/>
+    </context:component-scan>
+
     <context:component-scan base-package="com.navercorp.pinpoint.web.service">
         <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.AgentServiceImpl"/>
         <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.AgentEventServiceImpl"/>
         <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.AgentEventService"/>
         <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.AgentInfoServiceImpl"/>
-        <context:exclude-filter type="regex"
-                                expression="com.navercorp.pinpoint.web.service.AgentStatisticsServiceImpl"/>
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.AgentStatisticsServiceImpl"/>
         <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.AlarmServiceImpl"/>
         <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.FilteredMapServiceImpl"/>
         <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.MapServiceImpl"/>
         <!--        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.ProxyRequestTypeRegistryServiceImpl"/>-->
-        <context:exclude-filter type="regex"
-                                expression="com.navercorp.pinpoint.web.service.ResponseTimeHistogramServiceImpl"/>
+        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.ResponseTimeHistogramServiceImpl"/>
         <!--        <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.TransactionInfoServiceImpl"/>-->
         <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.UserGroupServiceImpl"/>
         <context:exclude-filter type="regex" expression="com.navercorp.pinpoint.web.service.UserServiceImpl"/>

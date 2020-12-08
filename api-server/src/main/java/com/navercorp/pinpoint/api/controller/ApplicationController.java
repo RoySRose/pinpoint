@@ -135,7 +135,7 @@ public class ApplicationController implements ApplicationApi {
     }
 
     private List<SpanBo> getTransanctionListSpanDetail(List<TransactionId> transactionIdList) {
-        logger.debug("transactionIdList size={} ", transactionIdList.size());
+        logger.info("transactionIdList size={} ", transactionIdList.size());
 
         if (CollectionUtils.isEmpty(transactionIdList)) {
             return Collections.emptyList();
@@ -143,7 +143,7 @@ public class ApplicationController implements ApplicationApi {
 
         List<List<SpanBo>> selectedSpans = spanService.selectSpans(transactionIdList);
 
-        logger.debug("getTransanctionListSpanDetail finished retrieved size={} ", transactionIdList.size());
+        logger.info("getTransanctionListSpanDetail finished selectedSpans retrieved size={} ", selectedSpans.size());
         return ListListUtils.toList(selectedSpans, transactionIdList.size());
 
 //        return null;

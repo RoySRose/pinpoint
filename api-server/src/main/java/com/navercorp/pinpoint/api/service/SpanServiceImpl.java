@@ -100,10 +100,11 @@ public class SpanServiceImpl implements SpanService {
         Objects.requireNonNull(transactionIdList, "transactionIdList");
 
         List<GetTraceInfo> getTraceInfoList = new ArrayList<>(transactionIdList.size());
+        logger.info("set spans start");
         for (TransactionId transactionId : transactionIdList) {
             getTraceInfoList.add(new GetTraceInfo(transactionId));
         }
-
+        logger.info("set spans end");
 //        final List<List<SpanBo>> traceList = traceDao.selectAllSpans(transactionIdList);
         final List<List<SpanBo>> traceList = traceDao.selectSpans(getTraceInfoList);
 
