@@ -1,5 +1,6 @@
 package com.navercorp.pinpoint.api.controller;
 
+import com.navercorp.pinpoint.api.bo.SpanBoResult;
 import com.navercorp.pinpoint.api.service.SpanService;
 import com.navercorp.pinpoint.api.service.TransactionService;
 import com.navercorp.pinpoint.api.util.DateUtil;
@@ -7,10 +8,6 @@ import com.navercorp.pinpoint.apiserver.api.ApplicationApi;
 import com.navercorp.pinpoint.common.profiler.util.TransactionId;
 import com.navercorp.pinpoint.common.server.bo.SpanBo;
 import com.navercorp.pinpoint.common.util.CollectionUtils;
-import com.navercorp.pinpoint.web.config.LogConfiguration;
-import com.navercorp.pinpoint.web.service.CommonService;
-import com.navercorp.pinpoint.web.service.ScatterChartService;
-import com.navercorp.pinpoint.web.service.TransactionInfoService;
 import com.navercorp.pinpoint.web.util.LimitUtils;
 import com.navercorp.pinpoint.web.util.ListListUtils;
 import com.navercorp.pinpoint.web.vo.GetTraceInfoParser;
@@ -23,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,20 +33,20 @@ public class ApplicationController implements ApplicationApi {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
-    private CommonService commonService;
+//    @Autowired
+//    private CommonService commonService;
 
-    @Autowired
-    private ScatterChartService scatter;
+//    @Autowired
+//    private ScatterChartService scatter;
 
-    @Autowired
-    private TransactionInfoService transactionInfoService;
+//    @Autowired
+//    private TransactionInfoService transactionInfoService;
 
     @Autowired
     private TransactionService transactionService;
 
-    @Autowired
-    private LogConfiguration logConfiguration;
+//    @Autowired
+//    private LogConfiguration logConfiguration;
 
     @Autowired
     private SpanService spanService;
@@ -74,13 +72,13 @@ public class ApplicationController implements ApplicationApi {
             @RequestParam("application") String application
             , @RequestParam("fromDate") String from
             , @RequestParam("toDate") String to) {
-        logger.debug("GET /getTransanctionList params {application={}, from={}, to={}, limit={}}", application, from, to, limit);
+        logger.info("GET /getTransanctionList params {application={}, from={}, to={}, limit={}}", application, from, to, limit);
 
         long fromDate = DateUtil.stringToLong(from);
         long toDate = DateUtil.stringToLong(to);
-        logger.debug("GET params {fromDate={}, toDate={}}", fromDate, toDate);
+        logger.info("GET params {fromDate={}, toDate={}}", fromDate, toDate);
 
-        List<TransactionId> transactionIdList = retrieveTransactionList(application, fromDate, toDate);
+        List<TransactionId> transactionIdList = getTransactionList(application, fromDate, toDate);
         return transactionIdList;
     }
 
@@ -91,62 +89,89 @@ public class ApplicationController implements ApplicationApi {
             , @RequestParam("from") long from
             , @RequestParam("to") long to) {
         System.out.println("Test1");
-        logger.debug("GET /getTransanctionList params {application={}, from={}, to={}, limit={}}", application, from, to, limit);
+        logger.info("GET /getTransanctionList params {application={}, from={}, to={}, limit={}}", application, from, to, limit);
 
-        List<TransactionId> transactionIdList = retrieveTransactionList(application, from, to);
+        List<TransactionId> transactionIdList = getTransactionList(application, from, to);
         return transactionIdList;
     }
 
     @RequestMapping(value = "/getTransanctionListInfo", method = RequestMethod.GET, params = "fromDate")
     @ResponseBody
-    public List<SpanBo> getTransanctionListInfo(
+    public List<SpanBoResult> getTransanctionListInfo(
             @RequestParam("application") String application
             , @RequestParam("fromDate") String from
             , @RequestParam("toDate") String to) {
 
         LimitUtils.checkRange(limit);
 
-        logger.debug("GET /getTransanctionListInfoString params {application={}, from={}, to={}, limit={}}", application, from, to, limit);
+        logger.info("GET /getTransanctionListInfoString params {application={}, from={}, to={}, limit={}}", application, from, to, limit);
 
         long fromDate = DateUtil.stringToLong(from);
         long toDate = DateUtil.stringToLong(to);
-        logger.debug("GET params {fromDate={}, toDate={}}", fromDate, toDate);
+        logger.info("GET params {fromDate={}, toDate={}}", fromDate, toDate);
 
-        List<TransactionId> transactionIdList = retrieveTransactionList(application, fromDate, toDate);
+        List<TransactionId> transactionIdList = getTransactionList(application, fromDate, toDate);
         return getTransanctionListSpanDetail(transactionIdList);
     }
 
     @RequestMapping(value = "/getTransanctionListInfo", method = RequestMethod.GET, params = "from")
     @ResponseBody
-    public List<SpanBo> getTransanctionListInfo(
+    public List<SpanBoResult> getTransanctionListInfo(
             @RequestParam("application") String application
             , @RequestParam("from") long from
             , @RequestParam("to") long to) {
 
-        logger.debug("GET /getTransanctionListInfoLong params {application={}, from={}, to={}, limit={}}", application, from, to, limit);
+        logger.info("GET /getTransanctionListInfoLong params {application={}, from={}, to={}, limit={}}", application, from, to, limit);
 
-        List<TransactionId> transactionIdList = retrieveTransactionList(application, from, to);
+        List<TransactionId> transactionIdList = getTransactionList(application, from, to);
         return getTransanctionListSpanDetail(transactionIdList);
     }
 
-    private List<TransactionId> retrieveTransactionList(String application, long from, long to) {
+    private List<TransactionId> getTransactionList(String application, long from, long to) {
+        logger.info("start heapSize: " + Runtime.getRuntime().totalMemory() + ", max : " + Runtime.getRuntime().maxMemory() + ", free : " + Runtime.getRuntime().freeMemory());
+        final long start = System.currentTimeMillis();
 
-        return transactionService.selectTransanctionList(application, from, to, limit);
+        List<TransactionId> result = transactionService.selectTransanctionList(application, from, to, limit);
+
+        final long time = System.currentTimeMillis() - start;
+
+        logger.info("getTransactionList execution time:{}ms ", time);
+        return result;
     }
 
-    private List<SpanBo> getTransanctionListSpanDetail(List<TransactionId> transactionIdList) {
+    private List<SpanBoResult> getTransanctionListSpanDetail(List<TransactionId> transactionIdList) {
         logger.info("transactionIdList size={} ", transactionIdList.size());
-
+        logger.info("finished 2nd: " + Runtime.getRuntime().totalMemory() + ", max : " + Runtime.getRuntime().maxMemory() + ", free : " + Runtime.getRuntime().freeMemory());
         if (CollectionUtils.isEmpty(transactionIdList)) {
             return Collections.emptyList();
         }
 
+        final long start = System.currentTimeMillis();
+
         List<List<SpanBo>> selectedSpans = spanService.selectSpans(transactionIdList);
 
-        logger.info("getTransanctionListSpanDetail finished selectedSpans retrieved size={} ", selectedSpans.size());
-        return ListListUtils.toList(selectedSpans, transactionIdList.size());
 
-//        return null;
+        List<SpanBo> result = ListListUtils.toList(selectedSpans, transactionIdList.size());
+        logger.info("getTransanctionListSpanDetail finished selectedSpans retrieved size={} ", result.size());
+        final long time = System.currentTimeMillis() - start;
+        logger.info("getTransanctionListSpanDetail execution time:{}ms ", time);
+
+        List<SpanBoResult> spanBoResultList = transform(result);
+        final long time2 = System.currentTimeMillis() - start;
+        logger.info("transform execution time:{}ms ", time2);
+
+        return spanBoResultList;
+    }
+
+    private List<SpanBoResult> transform(List<SpanBo> result) {
+
+        List<SpanBoResult> list = new ArrayList<>();
+        for(SpanBo spanBo : result){
+            SpanBoResult spanBoResult = new SpanBoResult(spanBo);
+            list.add(spanBoResult);
+        }
+
+        return list;
     }
 
 }

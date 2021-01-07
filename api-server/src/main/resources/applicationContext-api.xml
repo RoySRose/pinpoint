@@ -75,6 +75,7 @@
     <!--    <import resource="classpath:applicationContext-web-dao-config.xml" />-->
     <!--    <import resource="classpath:applicationContext-web-cache.xml" />-->
     <import resource="classpath:applicationContext-api-websocket.xml"/>
+<!--    <import resource="classpath:applicationContext-web-websocket.xml"/>-->
     <import resource="classpath:applicationContext-web-namespace.xml"/>
 
     <!--    <bean id="jsonObjectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"/>-->

@@ -25,6 +25,5 @@ import java.util.List;
  */
 public interface ApplicationTraceListDao {
 
-
     List<TransactionId> scanTraceList(String applicationName, long from, long to, int limit);
 }

@@ -82,85 +82,6 @@ public class HbaseApplicationTraceListDao implements ApplicationTraceListDao {
 
     private final TableDescriptor<HbaseColumnFamily.ApplicationTraceIndexTrace> descriptor;
 
-//    @Override
-//    public LimitedScanResult<List<TransactionId>> scanTraceIndex(final String applicationName, Range range, int limit, boolean scanBackward) {
-//        Objects.requireNonNull(applicationName, "applicationName");
-//        Objects.requireNonNull(range, "range");
-//        if (limit < 0) {
-//            throw new IllegalArgumentException("negative limit:" + limit);
-//        }
-//        logger.debug("scanTraceIndex");
-//        Scan scan = createScan(applicationName, range, scanBackward);
-//
-//        LastRowAccessor lastRowAccessor = new LastRowAccessor();
-//        TableName applicationTraceIndexTableName = descriptor.getTableName();
-//        List<List<TransactionId>> traceIndexList = hbaseOperations2.findParallel(applicationTraceIndexTableName,
-//                scan, traceIdRowKeyDistributor, limit, traceIndexMapper, lastRowAccessor, APPLICATION_TRACE_INDEX_NUM_PARTITIONS);
-//
-//        List<TransactionId> transactionIdSum = ListListUtils.toList(traceIndexList);
-//        final long lastTime = getLastTime(range, limit, lastRowAccessor, transactionIdSum);
-//
-//        return new LimitedScanResult<>(lastTime, transactionIdSum);
-//    }
-//
-//    private <T> long getLastTime(Range range, int limit, LastRowAccessor lastRowAccessor, List<T> list) {
-//        if (list.size() >= limit) {
-//            Long lastRowTimestamp = lastRowAccessor.getLastRowTimestamp();
-//            if (logger.isDebugEnabled()) {
-//                logger.debug("lastRowTimestamp lastTime:{}", DateTimeFormatUtils.format(lastRowTimestamp));
-//            }
-//            return lastRowTimestamp;
-//        } else {
-//            long from = range.getFrom();
-//            if (logger.isDebugEnabled()) {
-//                logger.debug("scanner start lastTime:{}", DateTimeFormatUtils.format(from));
-//            }
-//            return from;
-//        }
-//    }
-//
-//
-//    private class LastRowAccessor implements LimitEventHandler {
-//        private Long lastRowTimestamp = -1L;
-//        private TransactionId lastTransactionId = null;
-//        private int lastTransactionElapsed = -1;
-//
-//        @Override
-//        public void handleLastResult(Result lastResult) {
-//            if (lastResult == null) {
-//                return;
-//            }
-//
-//            Cell[] rawCells = lastResult.rawCells();
-//            Cell last = rawCells[rawCells.length - 1];
-//            byte[] row = CellUtil.cloneRow(last);
-//            byte[] originalRow = traceIdRowKeyDistributor.getOriginalKey(row);
-//            long reverseStartTime = BytesUtils.bytesToLong(originalRow, PinpointConstants.APPLICATION_NAME_MAX_LEN);
-//            this.lastRowTimestamp = TimeUtils.recoveryTimeMillis(reverseStartTime);
-//
-//            byte[] qualifier = CellUtil.cloneQualifier(last);
-//            this.lastTransactionId = TransactionIdMapper.parseVarTransactionId(qualifier, 0, qualifier.length);
-//            this.lastTransactionElapsed = BytesUtils.bytesToInt(qualifier, 0);
-//
-//            if (logger.isDebugEnabled()) {
-//                logger.debug("lastRowTimestamp={}, lastTransactionId={}, lastTransactionElapsed={}", DateTimeFormatUtils.format(lastRowTimestamp), lastTransactionId, lastTransactionElapsed);
-//            }
-//        }
-//
-//        private Long getLastRowTimestamp() {
-//            return lastRowTimestamp;
-//        }
-//
-//        public TransactionId getLastTransactionId() {
-//            return lastTransactionId;
-//        }
-//
-//        public int getLastTransactionElapsed() {
-//            return lastTransactionElapsed;
-//        }
-//    }
-
-
     private Scan createScan(String applicationName, Range range, boolean scanBackward) {
         Scan scan = new Scan();
         scan.setCaching(this.scanCacheSize);
@@ -236,8 +157,8 @@ public class HbaseApplicationTraceListDao implements ApplicationTraceListDao {
 
             logger.debug("scanning transaction list " + (endTime - startTime) + " milliseconds");
 
-            if (iter % 1 == 0)
-                break;
+//            if (iter == 2)
+//                break;
 
             if (transactionIdList.size() < limit || transactionIdList.size() == 0)
                 break;
