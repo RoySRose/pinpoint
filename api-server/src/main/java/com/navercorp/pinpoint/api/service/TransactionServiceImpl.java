@@ -56,38 +56,4 @@ public class TransactionServiceImpl implements TransactionService {
 
         return scanResult;
     }
-
-
-//    @Override
-//    public ApplicationAgentsList getAllApplicationAgentsList(AgentInfoFilter filter, long timestamp) {
-//        Objects.requireNonNull(filter, "filter");
-//
-//        ApplicationAgentsList.GroupBy groupBy = ApplicationAgentsList.GroupBy.APPLICATION_NAME;
-//        ApplicationAgentsList applicationAgentList = new ApplicationAgentsList(groupBy, filter);
-//        List<Application> applications = applicationIndexDao.selectAllApplicationNames();
-//        for (Application application : applications) {
-//            applicationAgentList.merge(getApplicationAgentsList(groupBy, filter, application.getName(), timestamp));
-//        }
-//        return applicationAgentList;
-//    }
-//
-//    @Override
-//    public ApplicationAgentsList getApplicationAgentsList(ApplicationAgentsList.GroupBy groupBy, AgentInfoFilter filter, String applicationName, long timestamp) {
-//        Objects.requireNonNull(groupBy, "groupBy");
-//        Objects.requireNonNull(filter, "filter");
-//        Objects.requireNonNull(applicationName, "applicationName");
-//
-//        ApplicationAgentsList applicationAgentsList = new ApplicationAgentsList(groupBy, filter);
-//        Set<AgentInfo> agentInfos = getAgentsByApplicationName(applicationName, timestamp);
-//        if (agentInfos.isEmpty()) {
-//            logger.warn("agent list is empty for application:{}", applicationName);
-//            return applicationAgentsList;
-//        }
-//        applicationAgentsList.addAll(agentInfos);
-//        if (logger.isDebugEnabled()) {
-//            logger.debug("getApplicationAgentsList={}", applicationAgentsList);
-//        }
-//        return applicationAgentsList;
-//    }
-
 }

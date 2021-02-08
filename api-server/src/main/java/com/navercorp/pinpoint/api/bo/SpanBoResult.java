@@ -20,12 +20,13 @@ import com.navercorp.pinpoint.common.profiler.util.TransactionId;
 import com.navercorp.pinpoint.common.server.bo.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * @author Roy Kim
  */
-public class SpanBoResult implements Event, BasicSpan {
+public class SpanBoResult implements Event, BasicSpan, Comparable<SpanBoResult>{
 
     // version 0 means that the type of prefix's size is int
     private byte version = 0;
@@ -36,6 +37,15 @@ public class SpanBoResult implements Event, BasicSpan {
     private long agentStartTime;
     //    private TransactionId transactionId;
     private String transactionIdCreated;
+    private long labeledRPC;
+
+    public long getLabeledRPC() {
+        return labeledRPC;
+    }
+
+    public void setLabeledRPC(long labeledRPC) {
+        this.labeledRPC = labeledRPC;
+    }
 //    private String agentId;
 //    private final long agentStartTime;
 //    private final long transactionSequence;
@@ -408,6 +418,14 @@ public class SpanBoResult implements Event, BasicSpan {
 
     public void setLoggingTransactionInfo(byte loggingTransactionInfo) {
         this.loggingTransactionInfo = loggingTransactionInfo;
+    }
+
+    @Override
+    public int compareTo(SpanBoResult o) {
+
+        return Comparator.comparing(SpanBoResult::isRoot, Comparator.reverseOrder())
+                .thenComparing(SpanBoResult::getStartTime)
+                .compare(this, o);
     }
 
     @Override

@@ -125,6 +125,9 @@ public class Node {
 
     private static List<Align> buildAlignList(SpanBo spanBo, Node node) {
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("buildAlignList span{spanBo={}, txid={}}", spanBo.getSpanId(), spanBo.getTransactionId().getAgentId()+"^"+spanBo.getTransactionId().getAgentStartTime()+"^"+spanBo.getTransactionId().getTransactionSequence());
+        }
         List<SpanEventBo> spanEventBoList = spanBo.getSpanEventBoList();
         List<Align> alignList = node.buildAlignList(spanEventBoList);
 
@@ -152,7 +155,7 @@ public class Node {
         List<Align> alignList = new ArrayList<>();
         for (SpanEventBo spanEventBo : spanEventBoList) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Populate spanEvent{seq={}, depth={}, event={}}", spanEventBo.getSequence(), spanEventBo.getDepth(), spanEventBo);
+                logger.debug("buildAlignList Populate spanEvent{seq={}, depth={}, event={}}", spanEventBo.getSequence(), spanEventBo.getDepth(), spanEventBo);
             }
             final Align spanEventAlign = this.newSpanEventAlign(spanEventBo);
             alignList.add(spanEventAlign);
@@ -181,7 +184,7 @@ public class Node {
             List<SpanEventBo> spanEventList = chunkBo.getSpanEventBoList();
             for (SpanEventBo spanEventBo : spanEventList) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Populate spanEvent{seq={}, depth={}, event={}}", spanEventBo.getSequence(), spanEventBo.getDepth(), spanEventBo);
+                    logger.debug("buildSpanChunkBaseAligns Populate spanEvent{seq={}, depth={}, event={}}", spanEventBo.getSequence(), spanEventBo.getDepth(), spanEventBo);
                 }
                 final Align spanEventAlign = this.newSpanEventAlign(chunkBo, spanEventBo);
                 alignList.add(spanEventAlign);

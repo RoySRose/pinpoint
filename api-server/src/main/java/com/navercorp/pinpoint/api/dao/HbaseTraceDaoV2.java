@@ -57,6 +57,7 @@ import java.util.*;
 public class HbaseTraceDaoV2 implements TraceDao {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final boolean DEBUG = logger.isDebugEnabled();
 
     private final HbaseOperations2 template2;
 
@@ -188,17 +189,35 @@ public class HbaseTraceDaoV2 implements TraceDao {
         List<List<SpanBo>> spanBoList = new ArrayList<>();
 
         int iter=0;
+        int ITERN=100;
         long start = 0;
+        long executionTime = 0;
         start = System.currentTimeMillis();
         logger.info("partitionSelect heapSize: " + Runtime.getRuntime().totalMemory() + ", max : " + Runtime.getRuntime().maxMemory()  + ", free : " +  Runtime.getRuntime().freeMemory());
         for (List<GetTraceInfo> getTraceInfoList : partitionGetTraceInfoList) {
 
+//            logger.info("checking");
+//            for(GetTraceInfo getTraceInfo : getTraceInfoList){
+//                TransactionId txid = getTraceInfo.getTransactionId();
+//                if(txid.getAgentId().startsWith("jp1_bulkapi")) {
+//                    logger.info("txid = {}", txid.getAgentId() + "^" + txid.getAgentStartTime() + "^" + txid.getTransactionSequence());
+//                }
+//            }
+//            logger.info("checking fin");
             List<List<SpanBo>> result = bulkSelect(getTraceInfoList, columnFamily, filter);
 
             spanBoList.addAll(result);
-            if (iter % 10 == 0) {
+            if (iter % ITERN == 0) {
                 final long time = System.currentTimeMillis() - start;
-                logger.info(iter + "th execution time:{}ms, total transactions : {}, free : {}", time, spanBoList.size(), Runtime.getRuntime().freeMemory());
+
+                logger.info(iter + "th execution time:{}ms, {}ms total transactions : {}, free : {}", time, executionTime, spanBoList.size(), Runtime.getRuntime().freeMemory());
+                if( DEBUG && time - executionTime > 1000 * ITERN ){
+                    for(List<SpanBo> listList :  result){
+                        TransactionId txid = listList.get(0).getTransactionId();
+                        logger.debug("txid = {}", txid.getAgentId()+"^" + txid.getAgentStartTime()+"^" + txid.getTransactionSequence());
+                    }
+                }
+                executionTime = System.currentTimeMillis() - start;
             }
             iter++;
         }

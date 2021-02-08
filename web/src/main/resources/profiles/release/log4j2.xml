@@ -49,8 +49,9 @@
             <AppenderRef ref="console"/>
         </Logger>
 
-        <Logger name="com.navercorp.pinpoint.web.controller" level="INFO" additivity="false">
+        <Logger name="com.navercorp.pinpoint.web.controller" level="DEBUG" additivity="false">
             <AppenderRef ref="console"/>
+            <AppenderRef ref="rollingFile"/>
         </Logger>
 
         <Logger name="com.navercorp.pinpoint.web.applicationmap" level="INFO" additivity="false">
@@ -61,12 +62,18 @@
             <AppenderRef ref="console"/>
         </Logger>
 
-        <Logger name="com.navercorp.pinpoint.web.service" level="INFO" additivity="false">
+        <Logger name="com.navercorp.pinpoint.web.service" level="DEBUG" additivity="false">
             <AppenderRef ref="console"/>
+            <AppenderRef ref="rollingFile"/>
         </Logger>
 
         <Logger name="com.navercorp.pinpoint.web.dao" level="INFO" additivity="false">
             <AppenderRef ref="console"/>
+        </Logger>
+
+        <Logger name="com.navercorp.pinpoint.web.calltree" level="DEBUG" additivity="false">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="rollingFile"/>
         </Logger>
 
         <Logger name="com.navercorp.pinpoint.web.mapper.ApiMetaDataMapper" level="INFO" additivity="false">
@@ -95,7 +102,7 @@
             <AppenderRef ref="console"/>
         </Logger>
 
-        <Root level="INFO">
+        <Root level="DEBUG">
             <AppenderRef ref="console"/>
             <AppenderRef ref="rollingFile"/>
         </Root>

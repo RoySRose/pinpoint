@@ -16,6 +16,7 @@
 
 package com.navercorp.pinpoint.api.service;
 
+import com.navercorp.pinpoint.api.bo.SpanBoResult;
 import com.navercorp.pinpoint.common.profiler.util.TransactionId;
 import com.navercorp.pinpoint.common.server.bo.SpanBo;
 
@@ -26,9 +27,7 @@ import java.util.List;
  */
 public interface SpanService {
 
-//    SpanResult selectSpan(TransactionId transactionId, long selectedSpanHint);
-//
-//    SpanResult selectSpan(TransactionId transactionId, long selectedSpanHint, ColumnGetCount columnGetCount);
+    List<SpanBoResult> selectSpans(List<TransactionId> transactionIdList);
 
-    List<List<SpanBo>> selectSpans(List<TransactionId> transactionIdList);
+    List<SpanBo> selectOneSpan(List<TransactionId> transactionIdList);
 }

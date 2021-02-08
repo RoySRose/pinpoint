@@ -47,6 +47,7 @@ public class SpanAligner {
     private final ServiceTypeRegistryService serviceTypeRegistryService;
 
     public SpanAligner(final List<SpanBo> spans, final long collectorAcceptTime, ServiceTypeRegistryService serviceTypeRegistryService) {
+        logger.debug("@@@SpanAligner create");
         this.nodeList = Node.newNodeList(spans);
         this.linkMap = LinkMap.buildLinkMap(nodeList, traceState, collectorAcceptTime, serviceTypeRegistryService);
         removeDuplicateNode();
@@ -57,6 +58,10 @@ public class SpanAligner {
     private void removeDuplicateNode() {
         // TODO??
         List<Node> duplicatedNodeList = linkMap.getDuplicatedNodeList();
+
+        if (isDebug) {
+            logger.debug("remove dup node size={}}", duplicatedNodeList.size());
+        }
         nodeList.removeAll(duplicatedNodeList);
         duplicatedNodeList.clear();
     }
@@ -66,15 +71,23 @@ public class SpanAligner {
     }
 
     public CallTree align() {
+        logger.debug("@@@populate");
         // populate call tree
         populate();
+
+        logger.debug("@@@link");
         // link to span
         link();
+
+        logger.debug("@@@fill");
         // fill missing span
         fill();
+
+        logger.debug("@@@clear");
         // remove unlinked
         clear();
         // select root
+        logger.debug("@@@root");
         return root();
     }
 

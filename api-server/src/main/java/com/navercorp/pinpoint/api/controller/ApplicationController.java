@@ -11,6 +11,7 @@ import com.navercorp.pinpoint.common.util.CollectionUtils;
 import com.navercorp.pinpoint.web.util.LimitUtils;
 import com.navercorp.pinpoint.web.util.ListListUtils;
 import com.navercorp.pinpoint.web.vo.GetTraceInfoParser;
+import org.apache.hadoop.hbase.shaded.org.apache.commons.math3.stat.descriptive.summary.Product;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.*;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -55,7 +59,7 @@ public class ApplicationController implements ApplicationApi {
     private final int limit = 5000;
 
     private final GetTraceInfoParser getTraceInfoParser = new GetTraceInfoParser();
-
+    private static final String CSV_SEPARATOR = ",";
 //    @Override
 //    public ResponseEntity<Object> getApplicationAgentsList() {
 //
@@ -66,9 +70,26 @@ public class ApplicationController implements ApplicationApi {
 //    }
 
 
+    @RequestMapping(value = "/getOneTransanctionInfo", method = RequestMethod.GET, params = "txid")
+    @ResponseBody
+    public List<SpanBo> getOneTransanctionInfo(@RequestParam("txid") String txid
+            ) {
+        logger.info("GET /getOneTransanctionInfo params {txid={}}", txid);
+        String[] s = txid.split("\\^");
+
+        TransactionId transactionId = new TransactionId(s[0],Long.parseLong(s[1]),Long.parseLong(s[2]));
+        List<TransactionId> transactionIdList = new ArrayList<>();
+        transactionIdList.add(transactionId);
+
+        List<SpanBo> spanBoList = getOneTransanctionSpanDetail(transactionIdList);
+
+        return spanBoList;
+    }
+
+
     @RequestMapping(value = "/getTransanctionList", method = RequestMethod.GET, params = "fromDate")
     @ResponseBody
-    public List<TransactionId> getTransanctionList(
+    public List<String> getTransanctionList(
             @RequestParam("application") String application
             , @RequestParam("fromDate") String from
             , @RequestParam("toDate") String to) {
@@ -79,20 +100,20 @@ public class ApplicationController implements ApplicationApi {
         logger.info("GET params {fromDate={}, toDate={}}", fromDate, toDate);
 
         List<TransactionId> transactionIdList = getTransactionList(application, fromDate, toDate);
-        return transactionIdList;
+
+        return resolvetxid(transactionIdList);
     }
 
     @RequestMapping(value = "/getTransanctionList", method = RequestMethod.GET, params = "from")
     @ResponseBody
-    public List<TransactionId> getTransanctionList(
+    public List<String> getTransanctionList(
             @RequestParam("application") String application
             , @RequestParam("from") long from
             , @RequestParam("to") long to) {
-        System.out.println("Test1");
         logger.info("GET /getTransanctionList params {application={}, from={}, to={}, limit={}}", application, from, to, limit);
 
         List<TransactionId> transactionIdList = getTransactionList(application, from, to);
-        return transactionIdList;
+        return resolvetxid(transactionIdList);
     }
 
     @RequestMapping(value = "/getTransanctionListInfo", method = RequestMethod.GET, params = "fromDate")
@@ -133,11 +154,25 @@ public class ApplicationController implements ApplicationApi {
 
         List<TransactionId> result = transactionService.selectTransanctionList(application, from, to, limit);
 
+        List<TransactionId> removeDup = new ArrayList<>(new HashSet<>(result));
+        logger.info("selected txids : {}, removedDup txids : {} ", result.size(), removeDup.size());
+
+        List<TransactionId> includeTxList = new ArrayList<>(removeDup.size()/2);
+        if(application.equals("WORKS_ADMINAPI_JP")){
+            for(TransactionId transactionId : removeDup){
+                if(!transactionId.getAgentId().startsWith("jp1_bulkapi")){
+                    includeTxList.add(transactionId);
+                }
+            }
+            logger.info("adding {} txids", includeTxList.size());
+        }
+
         final long time = System.currentTimeMillis() - start;
 
         logger.info("getTransactionList execution time:{}ms ", time);
-        return result;
+        return includeTxList;
     }
+
 
     private List<SpanBoResult> getTransanctionListSpanDetail(List<TransactionId> transactionIdList) {
         logger.info("transactionIdList size={} ", transactionIdList.size());
@@ -146,32 +181,36 @@ public class ApplicationController implements ApplicationApi {
             return Collections.emptyList();
         }
 
-        final long start = System.currentTimeMillis();
+        List<SpanBoResult> spanBoResultList = spanService.selectSpans(transactionIdList);
 
-        List<List<SpanBo>> selectedSpans = spanService.selectSpans(transactionIdList);
-
-
-        List<SpanBo> result = ListListUtils.toList(selectedSpans, transactionIdList.size());
-        logger.info("getTransanctionListSpanDetail finished selectedSpans retrieved size={} ", result.size());
-        final long time = System.currentTimeMillis() - start;
-        logger.info("getTransanctionListSpanDetail execution time:{}ms ", time);
-
-        List<SpanBoResult> spanBoResultList = transform(result);
-        final long time2 = System.currentTimeMillis() - start;
-        logger.info("transform execution time:{}ms ", time2);
+        logger.info("getTransanctionListSpanDetail finished selectedSpans retrieved size={} ", spanBoResultList.size());
 
         return spanBoResultList;
     }
 
-    private List<SpanBoResult> transform(List<SpanBo> result) {
-
-        List<SpanBoResult> list = new ArrayList<>();
-        for(SpanBo spanBo : result){
-            SpanBoResult spanBoResult = new SpanBoResult(spanBo);
-            list.add(spanBoResult);
+    private List<SpanBo> getOneTransanctionSpanDetail(List<TransactionId> transactionIdList) {
+        logger.info("transactionIdList size={} ", transactionIdList.size());
+        logger.info("finished 2nd: " + Runtime.getRuntime().totalMemory() + ", max : " + Runtime.getRuntime().maxMemory() + ", free : " + Runtime.getRuntime().freeMemory());
+        if (CollectionUtils.isEmpty(transactionIdList)) {
+            return Collections.emptyList();
         }
 
-        return list;
+        List<SpanBo> spanBoList = spanService.selectOneSpan(transactionIdList);
+
+        logger.info("getTransanctionListSpanDetail finished selectedSpans retrieved size={} ", spanBoList.size());
+
+        return spanBoList;
+    }
+
+
+    private List<String> resolvetxid(List<TransactionId> transactionIdList) {
+
+        List<String> result = new ArrayList<>(transactionIdList.size());
+
+        for(TransactionId transactionId : transactionIdList){
+            result.add(transactionId.getAgentId()+"^"+transactionId.getAgentStartTime()+"^"+transactionId.getTransactionSequence());
+        }
+        return result;
     }
 
 }
