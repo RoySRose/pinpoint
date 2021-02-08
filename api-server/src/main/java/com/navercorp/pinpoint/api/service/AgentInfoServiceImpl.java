@@ -248,6 +248,11 @@ public class AgentInfoServiceImpl implements AgentInfoService {
     }
 
     @Override
+    public boolean isActiveAgent(String agentId, Range range) {
+        return false;
+    }
+
+    @Override
     public void populateAgentStatuses(Collection<AgentInfo> agentInfos, long timestamp) {
         this.agentLifeCycleDao.populateAgentStatuses(agentInfos, timestamp);
     }
