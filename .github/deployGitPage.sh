@@ -22,7 +22,7 @@ cp -Rf ../temp/doc/images/* ./images
 
 #add, commit and push files
 git add -f .
-git commit -m "Auto commit with Github Action1"
+git diff-index --quiet HEAD || git commit -m "Auto commit with Github Action2"
 echo "add and commited gh-pages"
 
 git push -fq origin gh-pages > /dev/null
