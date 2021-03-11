@@ -14,7 +14,7 @@ git config --global user.email "sungwook0115.kim@gmail.com"
 git config --global user.name "RoySRose"
 
 #using token clone gh-pages branch
-git clone --quiet --branch=gh-pages https://.:${GITHUB_TOKEN}@github.com/pinpoint-apm/pinpoint.git gh-pages > /dev/null
+git clone --quiet --branch=gh-pages https://.:${GITHUB_TOKEN}@github.com/RoySRose/pinpoint.git gh-pages > /dev/null
 #go into directory and copy data we're interested in to that directory
 cd gh-pages
 cp -Rf ../temp/doc/*.md ./pages
