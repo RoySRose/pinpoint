@@ -59,6 +59,8 @@ public class CollectorConfiguration {
     private boolean uriStatEnable;
     @Value("${collector.statistics.agent-state.enable:false}")
     private boolean statisticsAgentStateEnable;
+    @Value("${collector.kafka:false}")
+    private boolean kafkaEnable;
 
     public int getAgentEventWorkerThreadSize() {
         return this.agentEventWorkerThreadSize;
@@ -157,6 +159,10 @@ public class CollectorConfiguration {
         return statisticsAgentStateEnable;
     }
 
+    public boolean isKafkaEnable() { return kafkaEnable; }
+
+    public void setKafkaEnable(boolean kafkaEnable) { this.kafkaEnable = kafkaEnable; }
+
     @PostConstruct
     public void log() {
         logger.info("{}", this);
@@ -179,6 +185,7 @@ public class CollectorConfiguration {
         sb.append(", clusterListenPort=").append(clusterListenPort);
         sb.append(", uriStatEnable=").append(uriStatEnable);
         sb.append(", statisticsAgentStateEnable=").append(statisticsAgentStateEnable);
+        sb.append(", kafkaEnable=").append(kafkaEnable);
         sb.append('}');
         return sb.toString();
     }

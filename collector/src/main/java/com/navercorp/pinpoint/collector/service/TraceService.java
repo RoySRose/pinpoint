@@ -19,6 +19,7 @@ package com.navercorp.pinpoint.collector.service;
 import com.navercorp.pinpoint.collector.dao.ApplicationTraceIndexDao;
 import com.navercorp.pinpoint.collector.dao.HostApplicationMapDao;
 import com.navercorp.pinpoint.collector.dao.TraceDao;
+import com.navercorp.pinpoint.collector.sender.Sender;
 import com.navercorp.pinpoint.common.server.bo.SpanBo;
 import com.navercorp.pinpoint.common.server.bo.SpanChunkBo;
 import com.navercorp.pinpoint.common.server.bo.SpanEventBo;
@@ -46,16 +47,20 @@ public class TraceService {
 
     private final ServiceTypeRegistryService registry;
 
+    private final Sender sender;
+
     public TraceService(TraceDao traceDao, ApplicationTraceIndexDao applicationTraceIndexDao, HostApplicationMapDao hostApplicationMapDao,
-                        StatisticsService statisticsService, ServiceTypeRegistryService registry) {
+                        StatisticsService statisticsService, ServiceTypeRegistryService registry, Sender sender) {
         this.traceDao = Objects.requireNonNull(traceDao, "traceDao");
         this.applicationTraceIndexDao = Objects.requireNonNull(applicationTraceIndexDao, "applicationTraceIndexDao");
         this.hostApplicationMapDao = Objects.requireNonNull(hostApplicationMapDao, "hostApplicationMapDao");
         this.statisticsService = Objects.requireNonNull(statisticsService, "statisticsService");
         this.registry = Objects.requireNonNull(registry, "registry");
+        this.sender = sender;
     }
 
     public void insertSpanChunk(final SpanChunkBo spanChunkBo) {
+        send(spanChunkBo);
         traceDao.insertSpanChunk(spanChunkBo);
         final ServiceType applicationServiceType = getApplicationServiceType(spanChunkBo);
         final List<SpanEventBo> spanEventList = spanChunkBo.getSpanEventBoList();
@@ -71,13 +76,13 @@ public class TraceService {
     }
 
     public void insertSpan(final SpanBo spanBo) {
+        send(spanBo);
         traceDao.insert(spanBo);
         applicationTraceIndexDao.insert(spanBo);
         insertAcceptorHost(spanBo);
         insertSpanStat(spanBo);
         insertSpanEventStat(spanBo);
     }
-
     private void insertAcceptorHost(SpanEventBo spanEvent, String applicationId, ServiceType serviceType) {
         final String endPoint = spanEvent.getEndPoint();
         if (endPoint == null) {
@@ -243,5 +248,13 @@ public class TraceService {
             return false;
         }
         return true;
+    }
+
+    private void send(SpanBo spanBo) {
+        sender.send(spanBo);
+    }
+
+    private void send(SpanChunkBo spanChunkBo) {
+        sender.send(spanChunkBo);
     }
 }
